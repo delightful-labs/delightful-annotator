@@ -12,6 +12,9 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@inrupt/solid-client": "^1.23.3",
+		"@inrupt/solid-client-authn-browser": "^1.12.2",
+		"@inrupt/vocab-common-rdf": "^1.0.5",
 		"@sveltejs/kit": "next",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.7.0",
