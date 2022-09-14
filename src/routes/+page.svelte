@@ -36,7 +36,7 @@
 	// 1b. Login Redirect. Call session.handleIncomingRedirect() function.
 	// When redirected after login, finish the process by retrieving session information.
 	async function handleRedirectAfterLogin() {
-		await session.handleIncomingRedirect($page.url.href);
+		await session.handleIncomingRedirect({ url: $page.url.href, restorePreviousSession: true });
 		isLoggedIn = session.info.isLoggedIn;
 	}
 
@@ -44,6 +44,7 @@
 	// This calls the function to process login information.
 	// If the function is called when not part of the login redirect, the function is a no-op.
 	$: if (browser) {
+		console.log('in browser');
 		handleRedirectAfterLogin();
 	}
 
@@ -162,7 +163,7 @@
 <p>{isLoggedIn}</p>
 
 {#if isLoggedIn}
-	<button on:click={() => login()}>Logout</button>
+	<button on:click={() => session.logout()}>Logout</button>
 {:else}
 	<button on:click={() => login()}>Login</button>
 {/if}
