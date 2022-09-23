@@ -1,40 +1,78 @@
 <script>
-	import {
-		addUrl,
-		addStringNoLocale,
-		createSolidDataset,
-		createThing,
-		getPodUrlAll,
-		getSolidDataset,
-		getThingAll,
-		getStringNoLocale,
-		removeThing,
-		saveSolidDatasetAt,
-		setThing
-	} from '@inrupt/solid-client';
-	import { SCHEMA_INRUPT, RDF, AS } from '@inrupt/vocab-common-rdf';
 	import { session } from '../stores';
 	import LoginButton from '../components/LoginButton.svelte';
+	//import * as rdf from 'rdflib';
+	import { PathFactory } from 'ldflex';
+	import ComunicaEngine from '../ComunicaEngine';
+	import dataFactory from '@rdfjs/data-model';
+	import { browser } from '$app/environment';
+
+	const context = {
+		'@context': {
+			'@vocab': 'http://xmlns.com/foaf/0.1/',
+			friends: 'knows',
+			label: 'http://www.w3.org/2000/01/rdf-schema#label',
+			rbn: 'https://ruben.verborgh.org/profile/#'
+		}
+	};
+	// The query engine and its source
+	const queryEngine = new ComunicaEngine('https://ruben.verborgh.org/profile/');
+	// The object that can create new paths
+	const path = new PathFactory({ context, queryEngine });
+
+	const ruben = path.create({
+		subject: dataFactory.namedNode('https://ruben.verborgh.org/profile/#me')
+	});
+
+	async function showPerson(person) {
+		console.log(`This person is ${await person.name}`);
+
+		console.log(`${await person.givenName} is interested in:`);
+		for await (const name of person.interest.label) console.log(`- ${name}`);
+
+		console.log(`${await person.givenName} is friends with:`);
+		for await (const name of person.friends.givenName) console.log(`- ${name}`);
+	}
+
+	$: if (browser) {
+		showPerson(ruben);
+	}
 
 	/**
 	 * @type {string[]|undefined}
 	 */
 	let pods;
 
-	$: console.log($session);
+	let myReadingList;
 
-	$: if ($session.info && $session.info.webId) {
-		const test = async () => {
-			pods = await getPodUrlAll($session.info.webId, { fetch: fetch });
-		};
-		test();
-	}
+	const SELECTED_POD = 'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/';
+
+	// const addFetcher = async () => {
+	// 	const privateResource =
+	// 		'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/getting-started/readingList/myList';
+	// 	window.solidFetcher = $session.fetch;
+	// 	fetcher = rdf.fetcher(store);
+	// 	try {
+	// 		await fetcher.load(privateResource).then((a) => console.log(a));
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 	}
+	// };
+
+	// $: if ($session.info.isLoggedIn) {
+	// 	addFetcher();
+	// }
+
+	const handleSubmit = (data) => {
+		const formData = Object.fromEntries(new FormData(data.target));
+		console.log(formData);
+	};
 </script>
 
 <LoginButton />
 
-<form>
-	<select disabled={!pods}>
+<form on:submit|preventDefault={(e) => handleSubmit(e)}>
+	<select disabled={!pods} name="pod">
 		{#if pods}
 			{#each pods as pod}
 				<option>{pod}</option>
@@ -43,4 +81,6 @@
 			<option>Loading</option>
 		{/if}
 	</select>
+	<input type="text" name="text" />
+	<input type="submit" value="Save" />
 </form>

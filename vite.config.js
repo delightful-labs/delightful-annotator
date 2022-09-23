@@ -4,8 +4,17 @@ import { sveltekit } from '@sveltejs/kit/vite';
 const config = {
 	plugins: [sveltekit()],
   define: {
-      global: {}
-  }
+    //global: {},
+  },
+  build: {
+    target: [ 'es2020' ]
+  },
+  optimizeDeps: {
+    include: ['@ldflex/comunica'],
+    esbuildOptions: {
+      target: 'es2020'
+    }
+  },
 };
 
 export default config;
