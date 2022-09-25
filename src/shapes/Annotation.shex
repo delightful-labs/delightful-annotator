@@ -1,0 +1,34 @@
+PREFIX oa:      <http://www.w3.org/ns/oa#>
+PREFIX schema:  <http://schema.org/>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+PREFIX dc:      <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX iana:    <http://www.iana.org/assignments/relation/>
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
+PREFIX as:      <http://www.w3.org/ns/activitystreams#>
+PREFIX :        <http://example.org/>
+
+oa:Annotation { 
+  oa:id            IRI ?;
+  oa:bodyValue     xsd:string ?
+    // rdfs:comment  "A plain text string to be used as the content of the body of the Annotation." ;
+  oa:canonical     IRI ?
+    // rdfs:comment  "The canonical IRI that can always be used to deduplicate the Annotation, regardless of the current IRI used to access the representation" ;
+  oa:hasTarget     IRI  ;
+  oa:motivatedBy   [ oa:assessing oa:bookmarking oa:classifying oa:commenting oa:describing oa:editing oa:highlighting oa:identifying oa:linking oa:moderating oa:questioning oa:replying oa:tagging ] ?;
+}
+
+oa:DataPositionSelector {
+  oa:start         xsd:nonNegativeInteger {1} ;
+  oa:end           xsd:nonNegativeInteger {1} ;
+}
+
+oa:TimeState {
+  oa:cachedSource  IRI ;
+  oa:sourceDate    xsd:dateTime ;
+}

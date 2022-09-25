@@ -6,6 +6,23 @@
 	import ComunicaEngine from '../ComunicaEngine';
 	import dataFactory from '@rdfjs/data-model';
 	import { browser } from '$app/environment';
+	import { LinkedDataObject } from 'ldo';
+	import { AnnotationFactory } from '../ldo/Annotation.ldoFactory';
+	import process from 'process';
+
+	const emptyProfile = AnnotationFactory.new('https://example.com/profile1');
+
+	emptyProfile.bodyValue = 'Test';
+
+	console.log(emptyProfile.bodyValue);
+
+	let fetcher;
+
+	$: console.log(fetcher);
+
+	$: if (browser) {
+		window.process = process;
+	}
 
 	const context = {
 		'@context': {
@@ -24,18 +41,16 @@
 		subject: dataFactory.namedNode('https://ruben.verborgh.org/profile/#me')
 	});
 
-	async function showPerson(person) {
-		console.log(`This person is ${await person.name}`);
-
-		console.log(`${await person.givenName} is interested in:`);
-		for await (const name of person.interest.label) console.log(`- ${name}`);
-
-		console.log(`${await person.givenName} is friends with:`);
-		for await (const name of person.friends.givenName) console.log(`- ${name}`);
+	$: if (browser) {
+		//showPerson(ruben);
 	}
 
-	$: if (browser) {
-		showPerson(ruben);
+	const validate = async (id) => {
+		const ses = await $session.clientAuthentication.validateCurrentSession(id);
+	};
+
+	$: if ($session && browser) {
+		//validate($session.info.sessionId);
 	}
 
 	/**
@@ -47,21 +62,21 @@
 
 	const SELECTED_POD = 'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/';
 
-	// const addFetcher = async () => {
-	// 	const privateResource =
-	// 		'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/getting-started/readingList/myList';
-	// 	window.solidFetcher = $session.fetch;
-	// 	fetcher = rdf.fetcher(store);
-	// 	try {
-	// 		await fetcher.load(privateResource).then((a) => console.log(a));
-	// 	} catch (e) {
-	// 		console.error(e);
-	// 	}
-	// };
+	const addFetcher = async () => {
+		const privateResource =
+			'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/getting-started/readingList/myList';
+		window.solidFetcher = $session.fetch;
+		fetcher = rdf.fetcher(store);
+		try {
+			await fetcher.load(privateResource).then((a) => console.log(a));
+		} catch (e) {
+			console.error(e);
+		}
+	};
 
-	// $: if ($session.info.isLoggedIn) {
-	// 	addFetcher();
-	// }
+	$: if ($session.info.isLoggedIn && browser) {
+		//addFetcher();
+	}
 
 	const handleSubmit = (data) => {
 		const formData = Object.fromEntries(new FormData(data.target));
@@ -83,4 +98,5 @@
 	</select>
 	<input type="text" name="text" />
 	<input type="submit" value="Save" />
+	Test
 </form>
