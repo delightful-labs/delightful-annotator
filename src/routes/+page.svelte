@@ -6,23 +6,11 @@
 	import ComunicaEngine from '../ComunicaEngine';
 	import dataFactory from '@rdfjs/data-model';
 	import { browser } from '$app/environment';
-	import { LinkedDataObject } from 'ldo';
 	import { AnnotationFactory } from '../ldo/Annotation.ldoFactory';
-	import process from 'process';
 
 	const emptyProfile = AnnotationFactory.new('https://example.com/profile1');
 
-	emptyProfile.bodyValue = 'Test';
-
-	console.log(emptyProfile.bodyValue);
-
-	let fetcher;
-
-	$: console.log(fetcher);
-
-	$: if (browser) {
-		window.process = process;
-	}
+	$: console.log($session);
 
 	const context = {
 		'@context': {
@@ -37,22 +25,6 @@
 	// The object that can create new paths
 	const path = new PathFactory({ context, queryEngine });
 
-	const ruben = path.create({
-		subject: dataFactory.namedNode('https://ruben.verborgh.org/profile/#me')
-	});
-
-	$: if (browser) {
-		//showPerson(ruben);
-	}
-
-	const validate = async (id) => {
-		const ses = await $session.clientAuthentication.validateCurrentSession(id);
-	};
-
-	$: if ($session && browser) {
-		//validate($session.info.sessionId);
-	}
-
 	/**
 	 * @type {string[]|undefined}
 	 */
@@ -62,21 +34,30 @@
 
 	const SELECTED_POD = 'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/';
 
-	const addFetcher = async () => {
-		const privateResource =
-			'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/getting-started/readingList/myList';
-		window.solidFetcher = $session.fetch;
-		fetcher = rdf.fetcher(store);
-		try {
-			await fetcher.load(privateResource).then((a) => console.log(a));
-		} catch (e) {
-			console.error(e);
+	const privateResource =
+		'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/getting-started/readingList/myList';
+
+	$: if ($session.info.isLoggedIn && browser) fetchDoc();
+
+	const fetchDoc = async () => {
+		console.log('getting');
+		const doc = await $session.fetch($session.info.webId, {
+			headers: { Accept: 'application/ld+json' }
+		});
+		if (doc.ok) {
+			// if HTTP-status is 200-299
+			// get the response body (the method explained below)
+			let json = await doc.json();
+			console.log(json);
+			// const fact = await AnnotationFactory.parse('https://example.com/aang', json, {
+			// 	format: 'Turtle',
+			// 	baseIRI: 'https://example.com/'
+			// });
+			// console.log(fact.$dataset());
+		} else {
+			alert('HTTP-Error: ' + doc.status);
 		}
 	};
-
-	$: if ($session.info.isLoggedIn && browser) {
-		//addFetcher();
-	}
 
 	const handleSubmit = (data) => {
 		const formData = Object.fromEntries(new FormData(data.target));
