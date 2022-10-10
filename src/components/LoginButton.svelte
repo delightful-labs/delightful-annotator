@@ -3,7 +3,8 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 
-	const SOLID_IDENTITY_PROVIDER = 'https://login.inrupt.com/';
+	//const SOLID_IDENTITY_PROVIDER = 'https://login.inrupt.com/';
+	const SOLID_IDENTITY_PROVIDER = 'https://solidcommunity.net/';
 
 	const login = async () => {
 		if (!$session.info.isLoggedIn) {

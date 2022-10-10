@@ -4,7 +4,10 @@ import { sveltekit } from '@sveltejs/kit/vite';
 const config = {
 	plugins: [sveltekit()],
   define: {
-    //global: {},
+    //Because of LDO. Might be able to raise an issue.
+    process: {
+      env: ''
+    },
   },
   build: {
     target: [ 'es2020' ]
@@ -15,6 +18,9 @@ const config = {
       target: 'es2020'
     }
   },
+  ssr: {
+    noExternal: ['@inrupt/solid-client']
+  }
 };
 
 export default config;

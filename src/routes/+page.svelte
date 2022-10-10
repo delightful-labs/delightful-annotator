@@ -2,28 +2,13 @@
 	import { session } from '../stores';
 	import LoginButton from '../components/LoginButton.svelte';
 	//import * as rdf from 'rdflib';
-	import { PathFactory } from 'ldflex';
-	import ComunicaEngine from '../ComunicaEngine';
-	import dataFactory from '@rdfjs/data-model';
 	import { browser } from '$app/environment';
 	import { AnnotationFactory } from '../ldo/Annotation.ldoFactory';
+	import AnnotationForm from '../components/AnnotationForm.svelte';
 
-	const emptyProfile = AnnotationFactory.new('https://example.com/profile1');
+	//import { getPodUrlAll } from '@inrupt/solid-client';
 
 	$: console.log($session);
-
-	const context = {
-		'@context': {
-			'@vocab': 'http://xmlns.com/foaf/0.1/',
-			friends: 'knows',
-			label: 'http://www.w3.org/2000/01/rdf-schema#label',
-			rbn: 'https://ruben.verborgh.org/profile/#'
-		}
-	};
-	// The query engine and its source
-	const queryEngine = new ComunicaEngine('https://ruben.verborgh.org/profile/');
-	// The object that can create new paths
-	const path = new PathFactory({ context, queryEngine });
 
 	/**
 	 * @type {string[]|undefined}
@@ -32,43 +17,61 @@
 
 	let myReadingList;
 
-	const SELECTED_POD = 'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/';
+	const SELECTED_POD = 'https://mjamesderocher.solidcommunity.net/';
 
-	const privateResource =
-		'https://storage.inrupt.com/5be41694-87b5-4cf5-b4f5-9b503cf3215c/getting-started/readingList/myList';
+	const privateResource = 'https://mjamesderocher.solidcommunity.net/annotations/';
 
-	$: if ($session.info.isLoggedIn && browser) fetchDoc();
+	//This works. Just commented out for now because will want to use it elsewhere.
+	//$: if ($session.info.isLoggedIn && browser) fetchDoc();
+
+	// const getMyPods = async function () {
+	// 	const mypods = await getPodUrlAll($session.info.webId, { fetch: $session.fetch });
+	// 	console.log(mypods);
+	// };
+
+	//$: if ($session.info.isLoggedIn && browser) getMyPods();
+
+	const createDoc = async () => {
+		const doc = await $session.fetch(privateResource, {
+			method: 'PUT'
+		});
+		console.log(doc);
+	};
 
 	const fetchDoc = async () => {
-		console.log('getting');
-		const doc = await $session.fetch($session.info.webId, {
+		const doc = await $session.fetch(privateResource, {
 			headers: { Accept: 'application/ld+json' }
 		});
 		if (doc.ok) {
 			// if HTTP-status is 200-299
 			// get the response body (the method explained below)
+			console.log('here');
 			let json = await doc.json();
 			console.log(json);
-			// const fact = await AnnotationFactory.parse('https://example.com/aang', json, {
-			// 	format: 'Turtle',
-			// 	baseIRI: 'https://example.com/'
-			// });
-			// console.log(fact.$dataset());
 		} else {
-			alert('HTTP-Error: ' + doc.status);
+			if (doc.status === 404) {
+				console.log('not here');
+				createDoc();
+			}
+			//alert('HTTP-Error: ' + doc.status);
 		}
 	};
 
+	/**
+	 * @param {any} data
+	 */
 	const handleSubmit = (data) => {
 		const formData = Object.fromEntries(new FormData(data.target));
-		console.log(formData);
+		formData.type = 'Annotation';
+		const test = AnnotationFactory.fromJson(formData);
+		console.log(test.bodyValue);
 	};
 </script>
 
 <LoginButton />
 
 <form on:submit|preventDefault={(e) => handleSubmit(e)}>
-	<select disabled={!pods} name="pod">
+	<!--<select disabled={!pods} name="pod">
 		{#if pods}
 			{#each pods as pod}
 				<option>{pod}</option>
@@ -76,8 +79,7 @@
 		{:else}
 			<option>Loading</option>
 		{/if}
-	</select>
-	<input type="text" name="text" />
+	</select>-->
+	<AnnotationForm />
 	<input type="submit" value="Save" />
-	Test
 </form>
